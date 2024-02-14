@@ -25,7 +25,23 @@ int thread_create(thread_obj_t* thread, void(*func)(void*), void* args) {
 }
 
 int thread_join(thread_obj_t* thread) {
-    return 0;
+    struct proc* currentproc = myproc();
+    struct proc* childproc = 0; 
+
+    acquire(&wait_lock); 
+    for (;;) { // Change this to something that actually makes sense (like checking all threads)
+      if (p->pid == thread->pid) {
+        childproc = p;
+        break;
+      }
+    }
+
+    while (childproc->state != ZOMBIE) {
+      sleep(childproc, &wait_lock);
+    }
+    release(&wait_lock); 
+	
+    return 0; 
 }
 
 int thread_destroy(thread_obj_t* thread) {
