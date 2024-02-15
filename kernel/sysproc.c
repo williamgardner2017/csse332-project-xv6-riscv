@@ -104,3 +104,19 @@ uint64 sys_thread_create(void)
   argaddr(2, &arg);
   return thread_create((struct thread *)t, (void (*fn)(void *))fn, (void *)arg);
 }
+
+uint64 sys_thread_join(void)
+{
+  // obtain the argument from the stack, we need some special handling
+  uint64 t;
+  argaddr(0, &t);
+  return thread_join((struct thread *)t);
+}
+
+uint64 sys_thread_destroy(void)
+{
+  // obtain the argument from the stack, we need some special handling
+  uint64 t;
+  argaddr(0, &t);
+  return thread_destroy((struct thread *)t);
+}
