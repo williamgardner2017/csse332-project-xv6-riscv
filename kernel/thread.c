@@ -45,5 +45,5 @@ int thread_join(thread_obj_t* thread) {
 }
 
 int thread_destroy(thread_obj_t* thread) {
-    return kill(thread->pid, SIGKILL);
+    return kill(thread->pid);
 }
