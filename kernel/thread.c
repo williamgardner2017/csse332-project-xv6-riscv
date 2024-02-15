@@ -5,7 +5,7 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 {
   struct proc *newproc;
   struct proc *currentproc = myproc();
-  if ((newproc = allocproc()) = 0)
+  if ((newproc = allocproc()) == 0)
   {
     return -1;
   }
@@ -17,12 +17,12 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
   release(&newproc->lock);
 
   acquire(&wait_lock);
-  newprocp->parent = currentproc;
+  newproc->parent = currentproc;
   release(&wait_lock);
 
-  acquire(&np->lock);
+  acquire(&newproc->lock);
   newproc->state = RUNNABLE;
-  release(&np->lock);
+  release(&newproc->lock);
 
   return 0;
 }
