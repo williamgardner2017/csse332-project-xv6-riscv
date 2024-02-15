@@ -86,7 +86,7 @@ void            printfinit(void);
 int             cpuid(void);
 void            exit(int);
 int             fork(void);
-int             thread_create(struct thread_obj_t *t, void (*fn)(void *), void *arg);
+int             thread_create(struct thread_obj_t *t, fn_t* fn, void *arg);
 int             thread_join(struct thread_obj_t *t);
 int             thread_destroy(struct thread_obj_t *t);
 int             growproc(int);

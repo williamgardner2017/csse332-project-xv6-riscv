@@ -101,19 +101,19 @@ uint64 sys_thread_create(void)
   argaddr(0, &t);
   argaddr(1, &fn);
   argaddr(2, &arg);
-  return thread_create(t, fn, arg);
+  return thread_create((struct thread_obj_t *)t, (fn_t*)fn, (void *)arg);
 }
 
 uint64 sys_thread_join(void)
 {
   uint64 t;
   argaddr(0, &t);
-  return thread_join(t);
+  return thread_join((struct thread_obj_t *)t);
 }
 
 uint64 sys_thread_destroy(void)
 {
   uint64 t;
   argaddr(0, &t);
-  return thread_destroy(t);
+  return thread_destroy((struct thread_obj_t *)t);
 }

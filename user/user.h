@@ -23,7 +23,7 @@ int getpid(void);
 char *sbrk(int);
 int sleep(int);
 int uptime(void);
-int thread_create(struct thread_obj_t *t, void (*fn)(void *), void *arg);
+int thread_create(struct thread_obj_t *t, fn_t* fn, void *arg);
 int thread_join(struct thread_obj_t *t);
 int thread_destroy(struct thread_obj_t *t);
 

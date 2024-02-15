@@ -1,6 +1,6 @@
 #include "proc.c"
 
-int thread_create(thread_obj_t *thread, void (*fn)(void *), void *args)
+int thread_create(thread_obj_t *thread, (fn_t*) fn, void *args)
 {
   struct proc *newproc;
   struct proc *currentproc = myproc();
