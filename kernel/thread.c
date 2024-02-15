@@ -41,6 +41,7 @@ int thread_join(thread_obj_t *thread)
     }
   }
 
+<<<<<<< Updated upstream
   while (childproc->state != ZOMBIE)
   {
     sleep(childproc, &wait_lock);
@@ -48,6 +49,15 @@ int thread_join(thread_obj_t *thread)
   release(&wait_lock);
 
   return 0;
+=======
+    while (childproc->state != ZOMBIE) {
+      sleep(childproc, &wait_lock);
+
+    }
+    release(&wait_lock); 
+	
+    return 0; 
+>>>>>>> Stashed changes
 }
 
 int thread_destroy(thread_obj_t *thread)
