@@ -33,17 +33,19 @@ int thread_join(struct thread_obj_t *thread)
   // struct proc *childproc = 0;
 
   // acquire(&wait_lock);
-  // for (;;)
-  // { // Change this to something that actually makes sense (like checking all threads)
-  //   if (p->pid == thread->pid)
-  //   {
+  // for (struct proc *p = proc; p < &proc[NPROC]; p++) {
+  //   if (p->pid == thread->pid && p->parent == currentproc) {
   //     childproc = p;
   //     break;
   //   }
   // }
 
-  // while (childproc->state != ZOMBIE)
-  // {
+  // if (!childproc) {
+  //   release(&wait_lock);
+  //   return -1; // Thread not found
+  // }
+
+  // while (childproc->state != ZOMBIE) {
   //   sleep(childproc, &wait_lock);
   // }
   // release(&wait_lock);
