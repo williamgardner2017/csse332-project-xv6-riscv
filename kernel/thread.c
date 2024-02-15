@@ -52,5 +52,10 @@ int thread_join(struct thread_obj_t *thread)
 
 int thread_destroy(struct thread_obj_t *thread)
 {
-  return kill(thread->pid);
+  int ret = kill(thread->pid);
+  if(ret == -1) {
+    return -1;
+  }
+  thread->pid = 0;
+  return 0;
 }
