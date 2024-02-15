@@ -1,16 +1,14 @@
-#include "thread.h"
-
 struct buf;
 struct context;
 struct file;
 struct inode;
-struct thread;
 struct pipe;
 struct proc;
 struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct thread_obj_t;
 
 // bio.c
 void            binit(void);
