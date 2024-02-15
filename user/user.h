@@ -1,5 +1,4 @@
 struct stat;
-struct thread;
 
 // system calls
 int fork(void);
