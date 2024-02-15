@@ -38,6 +38,7 @@ int thread_join(thread_obj_t* thread) {
 
     while (childproc->state != ZOMBIE) {
       sleep(childproc, &wait_lock);
+
     }
     release(&wait_lock); 
 	
