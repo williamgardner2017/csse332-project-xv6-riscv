@@ -4,6 +4,6 @@ struct thread_obj_t
   void *ret;
 };
 
-int thread_create(thread_obj_t *thread, void (*fn)(void *), void *args);
-int thread_join(thread_obj_t *thread);
-int thread_destroy(thread_obj_t *thread);
+int thread_create(struct thread_obj_t *thread, void (*fn)(void *), void *args);
+int thread_join(struct thread_obj_t *thread);
+int thread_destroy(struct thread_obj_t *thread);
