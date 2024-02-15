@@ -1,6 +1,6 @@
 #include "proc.c"
 
-int thread_create(thread_obj_t *thread, (fn_t*) fn, void *args)
+int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 {
   struct proc *newproc;
   struct proc *currentproc = myproc();
@@ -26,7 +26,7 @@ int thread_create(thread_obj_t *thread, (fn_t*) fn, void *args)
   return 0;
 }
 
-int thread_join(thread_obj_t *thread)
+int thread_join(struct thread_obj_t *thread)
 {
   struct proc *currentproc = myproc();
   struct proc *childproc = 0;
@@ -50,7 +50,7 @@ int thread_join(thread_obj_t *thread)
   return 0;
 }
 
-int thread_destroy(thread_obj_t *thread)
+int thread_destroy(struct thread_obj_t *thread)
 {
   return kill(thread->pid);
 }
