@@ -337,19 +337,18 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
     if((*pte & PTE_V) == 0)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
-
-    // kalloc a new page before copying
-    char *mem = kalloc();
-    if(mem == 0)
-      return -1;
-    // Make a copy of the page into the new pagetable
-    memmove(mem, (void*)pa, PGSIZE);
-
     if(mappages(new, i, PGSIZE, pa, PTE_FLAGS(*pte)) < 0)
       return -1;
   }
 
   sp/=PGSIZE;
+
+  // kalloc a new page before copying
+  char *mem = kalloc();
+  if(mem == 0)
+    return -1;
+  // Make a copy of the page into the new pagetable
+  memmove(mem, (void*)pa, PGSIZE);
 
   return 0;
 }
