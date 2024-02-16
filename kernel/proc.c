@@ -326,29 +326,54 @@ fork(void)
   return pid;
 }
 
+int pgcopy(pagetable_t old, pagetable_t new, uint64 sz)
+{
+  //not implemented
+  return 0;
+}
+
 int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 {
-  struct proc *newproc;
-  struct proc *currentproc = myproc();
-  if ((newproc = allocproc()) == 0)
+  int i;
+  struct proc *np;
+  struct proc *p = myproc();
+  struct thread_obj_t *local;
+
+  if (copyin(p->pagetable, local, thread, sizeof(struct thread_obj_t)) == -1)
+    return -1;
+
+  if ((np = allocproc()) == 0)
+    return -1;
+  
+  // Copy user memory from parent to child.
+  if (pgcopy(p->pagetable, np->pagetable, p->sz) < 0)
   {
+    freeproc(np);
+    release(&np->lock);
     return -1;
   }
-  // note: new process lock is locked at this point
+  np->sz = p->sz;
 
-  // Copy over heap and globals, do stack magic to start new while keeping reference to old
+  *(np->trapframe) = *(p->trapframe);
+  np->trapframe->epc = (uint64)fn;
+  np->trapframe->a0 = args;
 
-  thread->pid = newproc->pid;
+  safestrcpy(np->name, p->name, sizeof(p->name));
 
-  release(&newproc->lock);
+  local->pid = np->pid;
+
+  release(&np->lock);
 
   acquire(&wait_lock);
-  newproc->parent = currentproc;
+  np->parent = p;
   release(&wait_lock);
 
-  acquire(&newproc->lock);
-  newproc->state = RUNNABLE;
-  release(&newproc->lock);
+  acquire(&np->lock);
+  np->state = RUNNABLE;
+  release(&np->lock);
+
+  if (copyout(p->pagetable, thread, local, sizeof(struct thread_obj_t)) == -1)
+    return -1;
 
   return 0;
 }
