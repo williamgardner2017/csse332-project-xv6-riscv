@@ -411,6 +411,12 @@ int thread_join(struct thread_obj_t *thread)
 
 int thread_destroy(struct thread_obj_t *thread)
 {
+  struct proc *p = myproc();
+  struct thread_obj_t local;
+
+  if (copyin(p->pagetable, (char*)&local, (uint64)thread, sizeof(struct thread_obj_t)) == -1)
+    return -1;
+
   if(thread->pid == 0) {
     printf("thread is not running\n");
     return -1;
@@ -421,6 +427,10 @@ int thread_destroy(struct thread_obj_t *thread)
     return -1;
   }
   thread->pid = 0;
+
+  if (copyout(p->pagetable, (uint64)thread, (char *)&local, sizeof(struct thread_obj_t)) == -1)
+    return -1;
+  
   return 0;
 }
 
