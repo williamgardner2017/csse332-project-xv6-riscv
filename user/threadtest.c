@@ -13,7 +13,9 @@ void *test_fn(void *args)
 int main(int argc, char* argv[]) {
     printf("TESTING\n");
     struct thread_obj_t* testThread = malloc(sizeof(struct thread_obj_t*));
+    printf("trying to create\n");
     thread_create(testThread, test_fn, 0);
+    printf("create worked\n");
     sleep(5);
     printf("killing thread now\n");
     thread_destroy(testThread);
