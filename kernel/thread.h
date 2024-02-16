@@ -5,6 +5,3 @@ struct thread_obj_t
 };
 
 typedef void(fn_t)(void *);
-
-int thread_join(struct thread_obj_t *thread);
-int thread_destroy(struct thread_obj_t *thread);
