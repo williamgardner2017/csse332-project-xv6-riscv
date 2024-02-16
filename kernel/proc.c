@@ -353,6 +353,21 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
   return 0;
 }
 
+int thread_destroy(struct thread_obj_t *thread)
+{
+  if(thread->pid == 0) {
+    printf("thread is not running\n");
+    return -1;
+  }
+  int ret = kill(thread->pid);
+  if (ret == -1)
+  {
+    return -1;
+  }
+  thread->pid = 0;
+  return 0;
+}
+
 // Pass p's abandoned children to init.
 // Caller must hold wait_lock.
 void

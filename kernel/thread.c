@@ -27,8 +27,12 @@ int thread_join(struct thread_obj_t *thread)
   return 0;
 }
 
-int thread_destroy(struct thread_obj_t *thread)
+/*int thread_destroy(struct thread_obj_t *thread)
 {
+  if(thread->pid == 0) {
+    printf("thread is not running\n");
+    return -1;
+  }
   int ret = kill(thread->pid);
   if (ret == -1)
   {
@@ -36,4 +40,4 @@ int thread_destroy(struct thread_obj_t *thread)
   }
   thread->pid = 0;
   return 0;
-}
+}*/
