@@ -342,14 +342,20 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
   }
 
   sp/=PGSIZE;
+  if((pte = walk(old, sp, 0)) == 0) {
+    panic("pgcopy: stack should exist");
+  } 
+  pa = PTE2PA(*pte);
 
   // kalloc a new page before copying
-  char *mem = kalloc();
+  void *mem = kalloc();
   if(mem == 0)
     return -1;
   // Make a copy of the page into the new pagetable
   memmove(mem, (void*)pa, PGSIZE);
-
+  if(mappages(new, sp, PGSIZE, (uint64) &mem, PTE_FLAGS(*pte)) < 0) {
+    return -1;
+  }
   return 0;
 }
 

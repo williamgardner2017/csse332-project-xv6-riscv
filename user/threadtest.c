@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
     else {
 	printf("We joined wrong\n");
     }
+    free(testThread);
     exit(0);
 }
 
