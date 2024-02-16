@@ -344,25 +344,25 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 
   if ((np = allocproc()) == 0)
     return -1;
-  
+
+  release(&np->lock);
+
+  memcpy(np->trapframe, p->trapframe, sizeof(struct trapframe));
+  np->trapframe->epc = (uint64)fn;
+  np->trapframe->a0 = args;
+
   // Copy user memory from parent to child.
   if (pgcopy(p->pagetable, np->pagetable, p->sz) < 0)
   {
+    acquire(&np->lock);
     freeproc(np);
     release(&np->lock);
     return -1;
   }
   np->sz = p->sz;
 
-  *(np->trapframe) = *(p->trapframe);
-  np->trapframe->epc = (uint64)fn;
-  np->trapframe->a0 = args;
-
   safestrcpy(np->name, p->name, sizeof(p->name));
-
   local->pid = np->pid;
-
-  release(&np->lock);
 
   acquire(&wait_lock);
   np->parent = p;
