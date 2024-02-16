@@ -341,7 +341,7 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
       return -1;
   }
 
-  sp/=PGSIZE;
+  sp  ;
   if((pte = walk(old, sp, 0)) == 0) {
     panic("pgcopy: stack should exist");
   } 
@@ -365,14 +365,10 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
   return 0;
 }
 
-int thread_create(struct thread_obj_t *thread, uint64 fn, uint64 args)
+int thread_create(uint64 fn, uint64 args)
 {
   struct proc *np;
   struct proc *p = myproc();
-  struct thread_obj_t local;
-
-  if (copyin(p->pagetable, (char*)&local, (uint64)thread, sizeof(struct thread_obj_t)) == -1)
-    return -1;
 
   if ((np = allocproc()) == 0)
     return -1;
@@ -393,7 +389,6 @@ int thread_create(struct thread_obj_t *thread, uint64 fn, uint64 args)
   np->trapframe->a0 = args;
 
   safestrcpy(np->name, p->name, sizeof(p->name));
-  local.pid = np->pid;
 
   acquire(&wait_lock);
   np->parent = p;
@@ -403,25 +398,18 @@ int thread_create(struct thread_obj_t *thread, uint64 fn, uint64 args)
   np->state = RUNNABLE;
   release(&np->lock);
 
-  if (copyout(p->pagetable, (uint64)thread, (char *)&local, sizeof(struct thread_obj_t)) == -1)
-    return -1;
-
-  return 0;
+  return np->pid;
 }
 
-int thread_join(struct thread_obj_t *thread)
+int thread_join(int pid)
 {
   struct proc *p = myproc();
-  struct proc *np = 0;
-  struct thread_obj_t local; 
-
-  if (copyin(p->pagetable, (char*)&local, (uint64)thread, sizeof(struct thread_obj_t)) == -1)
-    return -1;
+  struct proc *np;
 
   acquire(&wait_lock);
-  for (struct proc *p = proc; p < &proc[NPROC]; p++) {
-    if (p->pid == thread->pid && p->parent == p) {
-      np = p;
+  for (struct proc *pc = proc; pc < &proc[NPROC]; pc++) {
+    if (pc->pid == pid) {
+      np = pc;
       break;
     }
   }
@@ -436,33 +424,21 @@ int thread_join(struct thread_obj_t *thread)
   }
   release(&wait_lock);
 
-  if (copyout(p->pagetable, (uint64)thread, (char *)&local, sizeof(struct thread_obj_t)) == -1)
-    return -1;
-
   return 0;
 }
 
-int thread_destroy(struct thread_obj_t *thread)
+int thread_destroy(int pid)
 {
   struct proc *p = myproc();
-  struct thread_obj_t local;
 
-  if (copyin(p->pagetable, (char*)&local, (uint64)thread, sizeof(struct thread_obj_t)) == -1)
-    return -1;
-
-  if(thread->pid == 0) {
+  if(pid == 0) {
     printf("thread is not running\n");
     return -1;
   }
-  int ret = kill(thread->pid);
+  int ret = kill(pid);
   if (ret == -1)
-  {
     return -1;
-  }
-  thread->pid = 0;
-
-  if (copyout(p->pagetable, (uint64)thread, (char *)&local, sizeof(struct thread_obj_t)) == -1)
-    return -1;
+  pid = 0;
   
   return 0;
 }

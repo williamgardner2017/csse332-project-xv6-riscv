@@ -94,25 +94,23 @@ sys_uptime(void)
 
 uint64 sys_thread_create(void)
 {
-  uint64 t;
   uint64 fn;
   uint64 arg;
-  argaddr(0, &t);
-  argaddr(1, &fn);
-  argaddr(2, &arg);
-  return thread_create((struct thread_obj_t *)t, fn, arg);
+  argaddr(0, &fn);
+  argaddr(1, &arg);
+  return thread_create(fn, arg);
 }
 
 uint64 sys_thread_join(void)
 {
-  uint64 t;
-  argaddr(0, &t);
-  return thread_join((struct thread_obj_t *)t);
+  int pid;
+  argint(0, &pid);
+  return thread_join(pid);
 }
 
 uint64 sys_thread_destroy(void)
 {
-  uint64 t;
-  argaddr(0, &t);
-  return thread_destroy((struct thread_obj_t *)t);
+  int pid;
+  argint(0, &pid);
+  return thread_destroy(pid);
 }

@@ -23,9 +23,9 @@ int getpid(void);
 char *sbrk(int);
 int sleep(int);
 int uptime(void);
-int thread_create(struct thread_obj_t *t, void *(*fn)(void *), void *arg);
-int thread_join(struct thread_obj_t *t);
-int thread_destroy(struct thread_obj_t *t);
+int thread_create(void *(*fn)(void *), void *arg);
+int thread_join(int pid);
+int thread_destroy(int pid);
 
 // ulib.c
 int stat(const char *, struct stat *);
