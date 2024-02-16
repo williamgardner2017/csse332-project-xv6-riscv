@@ -331,7 +331,7 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
   pte_t *pte;
   uint64 pa, i;
 
-  for(i = 0; i < sz; i += PGSIZE){
+  for(i = 0; i < sz-2*PGSIZE; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
       panic("uvmcopy: pte should exist");
     if((*pte & PTE_V) == 0)
@@ -341,7 +341,11 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
       return -1;
   }
 
+<<<<<<< HEAD
   sp  ;
+=======
+  //sp/=PGSIZE;
+>>>>>>> d96e4d2d427b963fc95f33c0111218250a47816b
   if((pte = walk(old, sp, 0)) == 0) {
     panic("pgcopy: stack should exist");
   } 
@@ -349,16 +353,16 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
   int perm = PTE_FLAGS(*pte);
 
   // kalloc a new page before copying
-  void *mem = kalloc();
+  char *mem = kalloc();
   if(mem == 0)
     return -1;
   // Make a copy of the page into the new pagetable
-  memmove(mem, (void*)pa, PGSIZE);
+  memmove(mem, (char*)pa, PGSIZE);
   printf("memmove worked?\n");
-  sp = PGROUNDUP(sp);
+  sp = PGROUNDDOWN(sp);
   uvmunmap(new, sp, 1, 0);
   printf("unmap worked?\n");
-  if(mappages(new, sp, PGSIZE, *(pde_t*)mem, perm) < 0) {
+  if(mappages(new, sp, PGSIZE, *(uint64*)mem, perm) < 0) {
     return -1;
   }
   printf("mappages worked?\n");
