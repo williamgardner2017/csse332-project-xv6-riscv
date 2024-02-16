@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "thread.h"
 
 struct cpu cpus[NCPU];
 
@@ -680,4 +681,31 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
+{
+  struct proc *newproc;
+  struct proc *currentproc = myproc();
+  if ((newproc = allocproc()) == 0)
+  {
+    return -1;
+  }
+  // note: new process lock is locked at this point
+
+  // Copy over heap and globals, do stack magic to start new while keeping reference to old
+
+  thread->pid = newproc->pid;
+
+  release(&newproc->lock);
+
+  acquire(&wait_lock);
+  newproc->parent = currentproc;
+  release(&wait_lock);
+
+  acquire(&newproc->lock);
+  newproc->state = RUNNABLE;
+  release(&newproc->lock);
+
+  return 0;
 }

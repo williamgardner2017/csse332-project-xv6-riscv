@@ -1,32 +1,6 @@
 #include "proc.c"
 #include "thread.h"
 
-int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
-{
-  struct proc *newproc;
-  struct proc *currentproc = myproc();
-  if ((newproc = allocproc()) == 0)
-  {
-    return -1;
-  }
-
-  // Copy over heap and globals, do stack magic to start new while keeping reference to old
-
-  thread->pid = newproc->pid;
-
-  release(&newproc->lock);
-
-  acquire(&wait_lock);
-  newproc->parent = currentproc;
-  release(&wait_lock);
-
-  acquire(&newproc->lock);
-  newproc->state = RUNNABLE;
-  release(&newproc->lock);
-
-  return 0;
-}
-
 int thread_join(struct thread_obj_t *thread)
 {
   // struct proc *currentproc = myproc();
