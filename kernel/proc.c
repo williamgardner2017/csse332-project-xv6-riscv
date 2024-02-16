@@ -332,14 +332,19 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz)
   return 0;
 }
 
+int memcpy(void *dst, void *src, uint64 n)
+{
+  //not implemented
+  return 0;
+}
+
 int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 {
-  int i;
   struct proc *np;
   struct proc *p = myproc();
-  struct thread_obj_t *local;
+  struct thread_obj_t local;
 
-  if (copyin(p->pagetable, local, thread, sizeof(struct thread_obj_t)) == -1)
+  if (copyin(p->pagetable, (char*)&local, (uint64)thread, sizeof(struct thread_obj_t)) == -1)
     return -1;
 
   if ((np = allocproc()) == 0)
@@ -349,7 +354,7 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 
   memcpy(np->trapframe, p->trapframe, sizeof(struct trapframe));
   np->trapframe->epc = (uint64)fn;
-  np->trapframe->a0 = args;
+  np->trapframe->a0 = (uint64)args;
 
   // Copy user memory from parent to child.
   if (pgcopy(p->pagetable, np->pagetable, p->sz) < 0)
@@ -362,7 +367,7 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
   np->sz = p->sz;
 
   safestrcpy(np->name, p->name, sizeof(p->name));
-  local->pid = np->pid;
+  local.pid = np->pid;
 
   acquire(&wait_lock);
   np->parent = p;
@@ -372,7 +377,7 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
   np->state = RUNNABLE;
   release(&np->lock);
 
-  if (copyout(p->pagetable, thread, local, sizeof(struct thread_obj_t)) == -1)
+  if (copyout(p->pagetable, (uint64)thread, (char *)&local, sizeof(struct thread_obj_t)) == -1)
     return -1;
 
   return 0;
