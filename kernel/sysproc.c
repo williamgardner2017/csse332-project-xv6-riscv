@@ -100,7 +100,7 @@ uint64 sys_thread_create(void)
   argaddr(0, &t);
   argaddr(1, &fn);
   argaddr(2, &arg);
-  return thread_create((struct thread_obj_t *)t, (fn_t*)fn, (void *)arg);
+  return thread_create((struct thread_obj_t *)t, fn, arg);
 }
 
 uint64 sys_thread_join(void)

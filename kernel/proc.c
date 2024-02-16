@@ -326,19 +326,27 @@ fork(void)
   return pid;
 }
 
-int pgcopy(pagetable_t old, pagetable_t new, uint64 sz)
+int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
 {
-  //not implemented
+  pte_t *pte;
+  uint64 pa, i;
+
+  for(i = 0; i < sz; i += PGSIZE){
+    if((pte = walk(old, i, 0)) == 0)
+      panic("uvmcopy: pte should exist");
+    if((*pte & PTE_V) == 0)
+      panic("uvmcopy: page not present");
+    pa = PTE2PA(*pte);
+    if(mappages(new, i, PGSIZE, pa, PTE_FLAGS(*pte)) < 0)
+      return -1;
+  }
+
+  sp/=PGSIZE;
+
   return 0;
 }
 
-int memcpy(void *dst, void *src, uint64 n)
-{
-  //not implemented
-  return 0;
-}
-
-int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
+int thread_create(struct thread_obj_t *thread, uint64 fn, uint64 args)
 {
   struct proc *np;
   struct proc *p = myproc();
@@ -352,12 +360,8 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
 
   release(&np->lock);
 
-  memcpy(np->trapframe, p->trapframe, sizeof(struct trapframe));
-  np->trapframe->epc = (uint64)fn;
-  np->trapframe->a0 = (uint64)args;
-
   // Copy user memory from parent to child.
-  if (pgcopy(p->pagetable, np->pagetable, p->sz) < 0)
+  if (pgcopy(p->pagetable, np->pagetable, p->sz, p->trapframe->sp) < 0)
   {
     acquire(&np->lock);
     freeproc(np);
@@ -365,6 +369,9 @@ int thread_create(struct thread_obj_t *thread, fn_t *fn, void *args)
     return -1;
   }
   np->sz = p->sz;
+
+  np->trapframe->epc = fn;
+  np->trapframe->a0 = args;
 
   safestrcpy(np->name, p->name, sizeof(p->name));
   local.pid = np->pid;
