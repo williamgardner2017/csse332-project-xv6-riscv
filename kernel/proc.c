@@ -395,7 +395,6 @@ int thread_join(int pid)
 {
   struct proc *np = 0;
 
-  acquire(&wait_lock);
   for (struct proc *pc = proc; pc < &proc[NPROC]; pc++) {
     if (pc->pid == pid) {
       np = pc;
@@ -403,15 +402,18 @@ int thread_join(int pid)
     }
   }
 
-  if (!np) {
-    release(&wait_lock);
+  if (!np)
     return -1; // Thread not found
-  }
 
-  while (np->state != ZOMBIE) {
-    sleep(np, &wait_lock);
+  acquire(&wait_lock);
+  acquire(&np->lock);
+  while(np->state != ZOMBIE) {
+    release(&np->lock);
+    sleep(myproc(), &wait_lock);
+    acquire(&np->lock);
   }
   release(&wait_lock);
+  release(&np->lock);
 
   return 0;
 }
