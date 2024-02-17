@@ -7,7 +7,7 @@ void test_fn(void *args)
     printf("eyyy i'm functioning here\n");
     sleep(10);
     printf("time to return baybee\n");
-    return;
+    exit(0);
 }
 
 void test_fn_2(void *args) {

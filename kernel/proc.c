@@ -393,6 +393,7 @@ int thread_create(uint64 fn, uint64 args)
 
 int thread_join(int pid)
 {
+  struct proc *p = myproc();
   struct proc *np = 0;
 
   for (struct proc *pc = proc; pc < &proc[NPROC]; pc++) {
@@ -409,7 +410,7 @@ int thread_join(int pid)
   acquire(&np->lock);
   while(np->state != ZOMBIE) {
     release(&np->lock);
-    sleep(myproc(), &wait_lock);
+    sleep(p, &wait_lock);
     acquire(&np->lock);
   }
   release(&wait_lock);
