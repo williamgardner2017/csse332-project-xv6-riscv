@@ -5,7 +5,6 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-#include "thread.h"
 
 struct cpu cpus[NCPU];
 
@@ -341,11 +340,6 @@ int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
       return -1;
   }
 
-<<<<<<< HEAD
-  sp  ;
-=======
-  //sp/=PGSIZE;
->>>>>>> d96e4d2d427b963fc95f33c0111218250a47816b
   if((pte = walk(old, sp, 0)) == 0) {
     panic("pgcopy: stack should exist");
   } 
