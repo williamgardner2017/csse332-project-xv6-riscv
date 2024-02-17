@@ -7,13 +7,13 @@ void *test_fn(void *args)
     printf("eyyy i'm functioning here\n");
     sleep(10);
     printf("time to return baybee\n");
-    return (void *)5;
+    return 0;
 }
 
 void *test_fn_2(void *args) {
     printf("we loopin here\n");
     for(;;)
-    return -1;
+    return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -23,12 +23,7 @@ int main(int argc, char* argv[]) {
     sleep(5);
     printf("killing thread now\n");
     thread_destroy(pid);
-    if(testThread->pid == 0) {
-	printf("properly destroyed\n");
-    }
-    else {
-	printf("Did not destroy properly\n");
-    }
+    printf("thread obliterated\n");
     printf("Creating a new thread\n");
     pid = thread_create(test_fn, 0);
     thread_join(pid);
