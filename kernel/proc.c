@@ -325,42 +325,44 @@ fork(void)
   return pid;
 }
 
-int pgcopy(pagetable_t old, pagetable_t new, uint64 sz, uint64 sp)
+uint64 pgcopy(pagetable_t old, pagetable_t new, uint64 sz)
 {
   pte_t *pte;
   uint64 pa, i;
 
-  for(i = 0; i < sz-2*PGSIZE; i += PGSIZE){
+  for(i = 0; i < sz; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
       panic("uvmcopy: pte should exist");
     if((*pte & PTE_V) == 0)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     if(mappages(new, i, PGSIZE, pa, PTE_FLAGS(*pte)) < 0)
-      return -1;
+      return 0;
   }
 
-  if((pte = walk(old, sp, 0)) == 0) {
-    panic("pgcopy: stack should exist");
-  } 
-  pa = PTE2PA(*pte);
-  int perm = PTE_FLAGS(*pte);
+  if ((sz = uvmalloc(new, sz, sz + PGSIZE, PTE_W)) == 0)
+    return 0;
+  return sz;
+  // if((pte = walk(old, sp, 0)) == 0) {
+  //   panic("pgcopy: stack should exist");
+  // } 
+  // pa = PTE2PA(*pte);
+  // int perm = PTE_FLAGS(*pte);
 
-  // kalloc a new page before copying
-  char *mem = kalloc();
-  if(mem == 0)
-    return -1;
-  // Make a copy of the page into the new pagetable
-  memmove(mem, (char*)pa, PGSIZE);
-  printf("memmove worked?\n");
-  sp = PGROUNDDOWN(sp);
-  uvmunmap(new, sp, 1, 0);
-  printf("unmap worked?\n");
-  if(mappages(new, sp, PGSIZE, *(uint64*)mem, perm) < 0) {
-    return -1;
-  }
-  printf("mappages worked?\n");
-  return 0;
+  // // kalloc a new page before copying
+  // char *mem = kalloc();
+  // if(mem == 0)
+  //   return -1;
+  // // Make a copy of the page into the new pagetable
+  // memmove(mem, (char*)pa, PGSIZE);
+  // printf("memmove worked?\n");
+  // sp = PGROUNDDOWN(sp);
+  // uvmunmap(new, sp, 1, 0);
+  // printf("unmap worked?\n");
+  // if(mappages(new, sp, PGSIZE, *(uint64*)mem, perm) < 0) {
+  //   return -1;
+  // }
+  // printf("mappages worked?\n");
 }
 
 int thread_create(uint64 fn, uint64 args)
@@ -374,14 +376,17 @@ int thread_create(uint64 fn, uint64 args)
   release(&np->lock);
 
   // Copy user memory from parent to child.
-  if (pgcopy(p->pagetable, np->pagetable, p->sz, p->trapframe->sp) < 0)
+  if ((np->sz = pgcopy(p->pagetable, np->pagetable, p->sz)) == 0)
   {
     acquire(&np->lock);
     freeproc(np);
     release(&np->lock);
     return -1;
   }
-  np->sz = p->sz;
+
+  uint64 sp = PGROUNDDOWN(np->sz);
+  np->context.sp = sp;
+  np->trapframe->sp = sp;
 
   np->trapframe->epc = fn;
   np->trapframe->a0 = args;
