@@ -401,8 +401,7 @@ int thread_create(uint64 fn, uint64 args)
 
 int thread_join(int pid)
 {
-  struct proc *p = myproc();
-  struct proc *np;
+  struct proc *np = 0;
 
   acquire(&wait_lock);
   for (struct proc *pc = proc; pc < &proc[NPROC]; pc++) {
@@ -427,8 +426,6 @@ int thread_join(int pid)
 
 int thread_destroy(int pid)
 {
-  struct proc *p = myproc();
-
   if(pid == 0) {
     printf("thread is not running\n");
     return -1;
