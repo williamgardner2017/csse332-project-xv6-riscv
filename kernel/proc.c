@@ -342,56 +342,43 @@ uint64 pgcopy(pagetable_t old, pagetable_t new, uint64 sz)
 
   if ((sz = uvmalloc(new, sz, sz + PGSIZE, PTE_W)) == 0)
     return 0;
-  return sz;
-  // if((pte = walk(old, sp, 0)) == 0) {
-  //   panic("pgcopy: stack should exist");
-  // } 
-  // pa = PTE2PA(*pte);
-  // int perm = PTE_FLAGS(*pte);
 
-  // // kalloc a new page before copying
-  // char *mem = kalloc();
-  // if(mem == 0)
-  //   return -1;
-  // // Make a copy of the page into the new pagetable
-  // memmove(mem, (char*)pa, PGSIZE);
-  // printf("memmove worked?\n");
-  // sp = PGROUNDDOWN(sp);
-  // uvmunmap(new, sp, 1, 0);
-  // printf("unmap worked?\n");
-  // if(mappages(new, sp, PGSIZE, *(uint64*)mem, perm) < 0) {
-  //   return -1;
-  // }
-  // printf("mappages worked?\n");
+  return sz;
 }
 
 int thread_create(uint64 fn, uint64 args)
 {
+  int i, pid;
   struct proc *np;
   struct proc *p = myproc();
 
   if ((np = allocproc()) == 0)
     return -1;
 
-  release(&np->lock);
-
   // Copy user memory from parent to child.
   if ((np->sz = pgcopy(p->pagetable, np->pagetable, p->sz)) == 0)
   {
-    acquire(&np->lock);
     freeproc(np);
     release(&np->lock);
     return -1;
   }
 
   *(np->trapframe) = *(p->trapframe);
-  uint64 sp = PGROUNDDOWN(np->sz);
-  np->trapframe->sp = sp;
-
+  np->trapframe->sp = np->sz - 1;
   np->trapframe->epc = fn;
   np->trapframe->a0 = args;
 
+  // increment reference counts on open file descriptors.
+  for (i = 0; i < NOFILE; i++)
+    if (p->ofile[i])
+      np->ofile[i] = filedup(p->ofile[i]);
+  np->cwd = idup(p->cwd);
+
   safestrcpy(np->name, p->name, sizeof(p->name));
+
+  pid = np->pid;
+
+  release(&np->lock);
 
   acquire(&wait_lock);
   np->parent = p;
@@ -401,7 +388,7 @@ int thread_create(uint64 fn, uint64 args)
   np->state = RUNNABLE;
   release(&np->lock);
 
-  return np->pid;
+  return pid;
 }
 
 int thread_join(int pid)

@@ -5,7 +5,7 @@
 void *test_fn(void *args)
 {
     printf("eyyy i'm functioning here\n");
-    sleep(10);
+    sleep(100);
     printf("time to return baybee\n");
     return 0;
 }
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     printf("TESTING\n");
     int pid = thread_create(test_fn_2, 0);
     printf("create worked\n");
-    sleep(5);
+    sleep(50);
     printf("killing thread now\n");
     thread_destroy(pid);
     printf("thread obliterated\n");
