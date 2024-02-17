@@ -384,8 +384,8 @@ int thread_create(uint64 fn, uint64 args)
     return -1;
   }
 
+  *(np->trapframe) = *(p->trapframe);
   uint64 sp = PGROUNDDOWN(np->sz);
-  np->context.sp = sp;
   np->trapframe->sp = sp;
 
   np->trapframe->epc = fn;
