@@ -3,7 +3,8 @@
 #include "user/user.h"
 
 void test_fn(void *args)
-{
+{   
+    printf("%d\n", args);
     printf("eyyy i'm functioning here\n");
     sleep(10);
     printf("time to return baybee\n");
